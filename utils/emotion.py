@@ -1,65 +1,90 @@
-# Sinamor
+# Sinamor — emotion engine for MindMitra
+# Using j-hartmann's distilroberta for 7-class emotion detection
+# Cached so we don't reload 250MB model on every rerun
+
 import streamlit as st
 from transformers import pipeline
 
-@st.cache_resource
-def get_emotion_model():
-    return pipeline("text-classification", 
-                    model="j-hartmann/emotion-english-distilroberta-base", 
-                    return_all_scores=True)
 
-def analyze_emotion(text):
-    if not text:
-        return []
-    pipe = get_emotion_model()
-    results = pipe(text)
-    return results[0] # returns list of dictionaries
+@st.cache_resource(show_spinner=False)
+def _load_emotion_pipeline():
+    """Load once, reuse forever. That's the Streamlit way."""
+    return pipeline(
+        "text-classification",
+        model="j-hartmann/emotion-english-distilroberta-base",
+        return_all_scores=True
+    )
 
-def check_crisis(text):
-    keywords = ["suicide", "kill myself", "end my life", "ending it", "harm myself", "worthless", "dying", "won't wake up", "marna", "muat", "vadhna"]
-    text_lower = text.lower()
-    for word in keywords:
-        if word in text_lower:
-            return True
-    return False
+
+def analyze_emotion(text: str) -> list:
+    """Returns list of {label, score} dicts for all 7 emotions."""
+    if not text or not text.strip():
+        return [{"label": "neutral", "score": 1.0}]
+    pipe = _load_emotion_pipeline()
+    return pipe(text)[0]
+
+
+def check_crisis(text: str) -> bool:
+    """
+    Hard-coded keyword guard. This runs BEFORE the ML model.
+    Sinamor: intentionally keeping this rule-based — no model should
+    be trusted alone for suicide detection in a hackathon prototype.
+    """
+    danger_phrases = [
+        "suicide", "kill myself", "end my life", "ending it",
+        "harm myself", "hurt myself", "want to die", "wanna die",
+        "worthless", "no reason to live", "better off dead",
+        "can't go on", "won't wake up", "don't want to exist",
+        # Punjabi / Hindi keywords
+        "marna", "maut", "khatam", "jeena nahi",
+        "mar jana", "zindagi khatam"
+    ]
+    txt = text.lower().strip()
+    return any(phrase in txt for phrase in danger_phrases)
+
+
+# ── Bilingual Response Bank ──────────────────────────────────
+# Sinamor: kept the tone warm but not clinical — students hate
+# feeling like they're talking to a therapist bot
 
 EMOTION_RESPONSES = {
     "joy": {
-        "en": "I'm so glad you're feeling good, {name}! Keep up the positive energy. What's making you feel this way?",
-        "pa": "ਮੈਨੂੰ ਬਹੁਤ ਖੁਸ਼ੀ ਹੈ ਕਿ ਤੁਸੀਂ ਚੰਗਾ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ, {name}! ਇਸ ਸਕਾਰਾਤਮਕ ਊਰਜਾ ਨੂੰ ਬਣਾਈ ਰੱਖੋ।"
+        "en": "That's amazing, {name}! Hold onto this energy. What's making your day so good?",
+        "pa": "ਬਹੁਤ ਵਧੀਆ, {name}! ਇਸ ਖੁਸ਼ੀ ਨੂੰ ਫੜ ਕੇ ਰੱਖੋ। ਕੀ ਚੱਲ ਰਿਹਾ ਵਧੀਆ?"
     },
     "sadness": {
-        "en": "I hear that you're feeling down, {name}. It's okay to feel this way sometimes. Remember, this too shall pass.",
-        "pa": "ਮੈਂ ਸਮਝਦਾ ਹਾਂ ਕਿ ਤੁਸੀਂ ਉਦਾਸ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ, {name}। ਕਦੇ ਕਦੇ ਅਜਿਹਾ ਮਹਿਸੂਸ ਕਰਨਾ ਠੀਕ ਹੈ। ਯਾਦ ਰੱਖੋ, ਇਹ ਸਮਾਂ ਵੀ ਲੰਘ ਜਾਵੇਗਾ।"
+        "en": "I hear you, {name}. It's okay to feel overwhelmed — you don't have to carry this alone.",
+        "pa": "ਮੈਂ ਸਮਝਦਾ ਹਾਂ, {name}। ਉਦਾਸ ਹੋਣਾ ਠੀਕ ਹੈ — ਤੁਸੀਂ ਇਕੱਲੇ ਨਹੀਂ ਹੋ।"
     },
     "anger": {
-        "en": "It sounds like you're really frustrated right now, {name}. Let's take a deep breath together.",
-        "pa": "ਲੱਗਦਾ ਹੈ ਤੁਸੀਂ ਬਹੁਤ ਗੁੱਸੇ ਵਿੱਚ ਹੋ, {name}। ਆਓ ਇਕੱਠੇ ਲੰਬਾ ਸਾਹ ਲਈਏ।"
+        "en": "Your frustration is completely valid, {name}. Vent it out — I'm listening without judgment.",
+        "pa": "ਤੁਹਾਡਾ ਗੁੱਸਾ ਸਮਝ ਆਉਂਦਾ ਹੈ, {name}। ਦੱਸੋ ਕੀ ਹੋਇਆ — ਮੈਂ ਸੁਣ ਰਿਹਾ ਹਾਂ।"
     },
     "fear": {
-        "en": "It's completely normal to feel anxious or scared, {name}. You are in a safe space here.",
-        "pa": "ਚਿੰਤਤ ਜਾਂ ਡਰਿਆ ਹੋਇਆ ਮਹਿਸੂਸ ਕਰਨਾ ਬਿਲਕੁਲ ਆਮ ਗੱਲ ਹੈ, {name}। ਤੁਸੀਂ ਇੱਥੇ ਸੁਰੱਖਿਅਤ ਹੋ।"
+        "en": "Things can feel scary, {name}, but you're in a safe space right now. One step at a time.",
+        "pa": "ਡਰ ਲੱਗਣਾ ਆਮ ਗੱਲ ਹੈ, {name}। ਤੁਸੀਂ ਇੱਥੇ ਸੁਰੱਖਿਅਤ ਹੋ — ਇੱਕ ਕਦਮ ਕਰਕੇ ਚੱਲੀਏ।"
     },
     "surprise": {
-        "en": "That sounds unexpected, {name}! How are you processing this?",
-        "pa": "ਇਹ ਅਚਾਨਕ ਲੱਗਦਾ ਹੈ, {name}! ਤੁਸੀਂ ਇਸ ਬਾਰੇ ਕੀ ਸੋਚ ਰਹੇ ਹੋ?"
+        "en": "Whoa, didn't see that coming! How are you processing this, {name}?",
+        "pa": "ਇਹ ਤਾਂ ਅਚਾਨਕ ਹੋ ਗਿਆ, {name}! ਤੁਸੀਂ ਕੀ ਸੋਚ ਰਹੇ ਹੋ ਇਸ ਬਾਰੇ?"
     },
     "disgust": {
-        "en": "That sounds really unpleasant, {name}. Let's talk through it if you want.",
-        "pa": "ਇਹ ਬਹੁਤ ਅਣਸੁਖਾਵਾਂ ਲੱਗਦਾ ਹੈ, {name}। ਜੇ ਤੁਸੀਂ ਚਾਹੋ ਤਾਂ ਆਓ ਇਸ ਬਾਰੇ ਗੱਲ ਕਰੀਏ।"
+        "en": "That sounds really unpleasant, {name}. You don't have to tolerate things that feel wrong.",
+        "pa": "ਇਹ ਬਹੁਤ ਮਾੜਾ ਲੱਗਦਾ ਹੈ, {name}। ਤੁਹਾਨੂੰ ਗਲਤ ਚੀਜ਼ਾਂ ਬਰਦਾਸ਼ਤ ਨਹੀਂ ਕਰਨੀਆਂ ਚਾਹੀਦੀਆਂ।"
     },
     "neutral": {
-        "en": "I'm listening, {name}. How's your day at GNDEC going? Any assignments or exams stressing you out?",
-        "pa": "ਮੈਂ ਸੁਣ ਰਿਹਾ ਹਾਂ, {name}। GNDEC ਵਿੱਚ ਤੁਹਾਡਾ ਦਿਨ ਕਿਵੇਂ ਜਾ ਰਿਹਾ ਹੈ?"
+        "en": "I'm right here, {name}. How are the classes and assignments going? Anything bugging you?",
+        "pa": "ਮੈਂ ਇੱਥੇ ਹਾਂ, {name}। ਕਲਾਸਾਂ ਕਿਵੇਂ ਚੱਲ ਰਹੀਆਂ? ਕੋਈ ਗੱਲ ਪਰੇਸ਼ਾਨ ਕਰ ਰਹੀ?"
     }
 }
 
 EMOTION_EMOJIS = {
-    "joy": "😊", "sadness": "💙", "anger": "😤", "fear": "😨", "disgust": "🤢", "surprise": "😲", "neutral": "🧘"
+    "joy": "🌟", "sadness": "🌧️", "anger": "🔥",
+    "fear": "🛡️", "disgust": "🤚", "surprise": "⚡", "neutral": "🍃"
 }
 
 EMOTION_COLORS = {
-    "joy": "#FFD700", "sadness": "#4169E1", "anger": "#DC143C", 
-    "fear": "#8B008B", "neutral": "#808080", "surprise": "#FF9933", 
-    "disgust": "#006400"
+    "joy": "#F59E0B", "sadness": "#3B82F6", "anger": "#EF4444",
+    "fear": "#8B5CF6", "neutral": "#9CA3AF", "surprise": "#10B981",
+    "disgust": "#059669"
 }

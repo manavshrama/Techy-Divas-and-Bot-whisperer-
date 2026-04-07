@@ -1,5 +1,11 @@
-# Sinamor
 [theme]
-primaryColor="#FF9933"
-backgroundColor="#FFFFFF"
-secondaryBackgroundColor="#138808"
+primaryColor = "#FF9933"
+backgroundColor = "#FFFFFF"
+secondaryBackgroundColor = "#FAFCFF"
+textColor = "#222222"
+font = "sans serif"
+
+[server]
+headless = true
+enableCORS = false
+enableXsrfProtection = false

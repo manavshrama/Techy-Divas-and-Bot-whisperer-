@@ -1,12 +1,8 @@
-# Sinamor
-streamlit
-transformers
-torch
-plotly
-pandas
-SpeechRecognition
-pyttsx3
-fpdf2
-# Note: PyAudio is required for SpeechRecognition mic support
-# On Windows: pip install pipwin then pipwin install pyaudio
-# On Linux: sudo apt-get install python3-pyaudio
+streamlit==1.32.2
+transformers==4.38.2
+torch==2.2.1
+plotly==5.19.0
+pandas==2.2.1
+SpeechRecognition==3.10.1
+pyttsx3==2.90
+fpdf2==2.7.9
