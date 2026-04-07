@@ -1,0 +1,183 @@
+{
+  "project": {
+    "name": "MindMitra GNDEC Edition",
+    "type": "AI Mental Health Support Web App",
+    "platform": "Streamlit",
+    "target_users": "Engineering students in India (especially Punjab)",
+    "description": "A bilingual AI mental health companion that detects emotions, responds empathetically, tracks mood, handles crisis situations, and generates reports."
+  },
+  "objectives": [
+    "Provide instant emotional support to students",
+    "Enable self-awareness via mood tracking",
+    "Offer safe crisis intervention",
+    "Ensure culturally relevant interaction (English + Punjabi)",
+    "Build a lightweight deployable AI system"
+  ],
+  "architecture": {
+    "flow": [
+      "User Input (Text/Voice)",
+      "Streamlit Frontend",
+      "Emotion Detection Module",
+      "Crisis Detection Layer",
+      "Response Engine",
+      "Session State Storage",
+      "Outputs: Chat + Mood Tracker + PDF Report"
+    ]
+  },
+  "modules": {
+    "app.py": {
+      "role": "Main controller",
+      "responsibilities": [
+        "UI rendering",
+        "Session state management",
+        "Chat handling",
+        "Sidebar and visualization",
+        "Integration of all modules"
+      ]
+    },
+    "utils/emotion.py": {
+      "functions": [
+        "detect_emotion(text: str) -> dict",
+        "check_crisis(text: str) -> bool"
+      ],
+      "model": "j-hartmann/emotion-english-distilroberta-base",
+      "emotions": ["joy", "sadness", "anger", "fear", "surprise", "disgust", "neutral"]
+    },
+    "utils/pdf_report.py": {
+      "function": "generate_mood_pdf(mood_history: list, student_name: str) -> bytes",
+      "features": [
+        "Header with app name",
+        "Student name and date",
+        "Mood table (last 10 entries)",
+        "Motivational message (English + Punjabi)"
+      ]
+    },
+    "utils/voice.py": {
+      "function": "record_voice() -> str",
+      "behavior": [
+        "Record ~5 seconds audio",
+        "Convert speech to text",
+        "Fallback if microphone fails"
+      ]
+    }
+  },
+  "data_structures": {
+    "messages": [
+      {
+        "role": "user/assistant",
+        "content": "string"
+      }
+    ],
+    "mood_history": [
+      {
+        "emotion": "string",
+        "timestamp": "string",
+        "text": "string"
+      }
+    ]
+  },
+  "response_engine": {
+    "rules": [
+      "Responses must be supportive",
+      "2-3 lines maximum",
+      "Mix English + Punjabi",
+      "Reference student life (exams, placements, family pressure)"
+    ],
+    "example": {
+      "sadness": "Yaar lagda hai tu thoda overwhelmed hai. Exams da pressure sab nu hunda hai. Thoda break le, tu handle kar lega 💚"
+    }
+  },
+  "crisis_detection": {
+    "keywords": [
+      "suicide",
+      "end it",
+      "mar jana",
+      "jeena nahi",
+      "khatam karna"
+    ],
+    "behavior": [
+      "Stop chatbot response",
+      "Trigger emergency UI",
+      "Show helplines"
+    ],
+    "helplines": {
+      "iCALL": "9152987821",
+      "Vandrevala": "1860-2662-345",
+      "NIMHANS": "Official mental health support"
+    }
+  },
+  "mood_tracker": {
+    "type": "Plotly Pie Chart",
+    "colors": {
+      "joy": "#FF9933",
+      "sadness": "#4169E1",
+      "anger": "#DC143C",
+      "fear": "#8B008B",
+      "neutral": "#808080",
+      "surprise": "#FFD700",
+      "disgust": "#006400"
+    }
+  },
+  "voice_input": {
+    "flow": [
+      "User clicks voice button",
+      "record_voice() is triggered",
+      "SpeechRecognition converts speech to text",
+      "Text auto-filled into chat input"
+    ]
+  },
+  "pdf_report": {
+    "includes": [
+      "Mood summary",
+      "Table with timestamps and emotions",
+      "Emojis",
+      "Motivational message"
+    ],
+    "output": "PDF byte stream"
+  },
+  "grounding_exercise": {
+    "method": "5-4-3-2-1 technique",
+    "steps": [
+      "5 things you see",
+      "4 things you feel",
+      "3 things you hear",
+      "2 things you smell",
+      "1 thing you taste"
+    ],
+    "timer": "30 seconds countdown"
+  },
+  "ui_ux": {
+    "theme": {
+      "primary": "#FF9933",
+      "background": "#FFFFFF",
+      "secondary": "#138808"
+    },
+    "features": [
+      "Chat bubbles",
+      "Clean sidebar",
+      "Typing animation",
+      "Minimal clutter UI"
+    ]
+  },
+  "safety_rules": [
+    "Do not provide medical advice",
+    "Do not encourage harmful behavior",
+    "Always show helplines in crisis",
+    "Maintain supportive tone"
+  ],
+  "performance": [
+    "Use caching for model loading",
+    "Avoid repeated model initialization",
+    "Efficient session state handling"
+  ],
+  "testing": [
+    {
+      "input": "Exams are killing me",
+      "expected": "sadness response"
+    },
+    {
+      "input": "I got internship!",
+      "expected": "joy response"
+    }
+  ]
+}
