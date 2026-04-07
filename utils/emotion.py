@@ -1,11 +1,6 @@
-# Sinamor 
-# Sinamor: Adding crisis detection and response mapping.
-# Sinamor: Mental health apps need a safety net, especially for student stress.
-# Sinamor: Let's make sure our friends at GNDEC have the right help nearby.
-
+# Sinamor
 import streamlit as st
 from transformers import pipeline
-import datetime
 
 @st.cache_resource
 def get_emotion_model():
@@ -18,21 +13,10 @@ def analyze_emotion(text):
         return []
     pipe = get_emotion_model()
     results = pipe(text)
-    return results[0]
-
-def get_top_emotion(text):
-    results = analyze_emotion(text)
-    if not results:
-        return "neutral", 0.0
-    top = max(results, key=lambda x: x['score'])
-    return top['label'], top['score']
+    return results[0] # returns list of dictionaries
 
 def check_crisis(text):
-    """
-    Sinamor: Hardcoded keywords for crisis detection.
-    In a real app, this would use a more robust classifier.
-    """
-    keywords = ["suicide", "kill myself", "end my life", "harm myself", "worthless", "dying", "won't wake up"]
+    keywords = ["suicide", "kill myself", "end my life", "harm myself", "worthless", "dying", "won't wake up", "marna", "muat", "vadhna"]
     text_lower = text.lower()
     for word in keywords:
         if word in text_lower:
@@ -40,13 +24,34 @@ def check_crisis(text):
     return False
 
 EMOTION_RESPONSES = {
-    "joy": "I am so happy to hear that, {name}! Tera din vadiya lang reha lagda. Keep spreading that positivity! 😊",
-    "sadness": "I'm here for you, {name}. It's okay to feel low sometimes. Ro laina chahida jekar mann bhari hai. Tell me more? 💙",
-    "anger": "I hear you. Don't worry, gussey vich asi sab kive na kive feel karde haan. Leh dasso ki hoya? 😤",
-    "fear": "Take a deep breath, {name}. You're not alone. Assi milke face karaange jo vi hai. 🫂",
-    "disgust": "That sounds rough. Kade kade things don't feel right. Let's talk it out. 🤮",
-    "surprise": "Oh wow! Utte thalle tan chalda hi rehnda hai life vich. Kya baat hai! 😲",
-    "neutral": "Hmm, I see. Hor sunao, hor ki chal reha GNDEC vich? 🧘"
+    "joy": {
+        "en": "I'm so glad you're feeling good, {name}! Keep up the positive energy. What's making you feel this way?",
+        "pa": "ਮੈਨੂੰ ਬਹੁਤ ਖੁਸ਼ੀ ਹੈ ਕਿ ਤੁਸੀਂ ਚੰਗਾ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ, {name}! ਇਸ ਸਕਾਰਾਤਮਕ ਊਰਜਾ ਨੂੰ ਬਣਾਈ ਰੱਖੋ।"
+    },
+    "sadness": {
+        "en": "I hear that you're feeling down, {name}. It's okay to feel this way sometimes. Remember, this too shall pass.",
+        "pa": "ਮੈਂ ਸਮਝਦਾ ਹਾਂ ਕਿ ਤੁਸੀਂ ਉਦਾਸ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ, {name}। ਕਦੇ ਕਦੇ ਅਜਿਹਾ ਮਹਿਸੂਸ ਕਰਨਾ ਠੀਕ ਹੈ। ਯਾਦ ਰੱਖੋ, ਇਹ ਸਮਾਂ ਵੀ ਲੰਘ ਜਾਵੇਗਾ।"
+    },
+    "anger": {
+        "en": "It sounds like you're really frustrated right now, {name}. Let's take a deep breath together.",
+        "pa": "ਲੱਗਦਾ ਹੈ ਤੁਸੀਂ ਬਹੁਤ ਗੁੱਸੇ ਵਿੱਚ ਹੋ, {name}। ਆਓ ਇਕੱਠੇ ਲੰਬਾ ਸਾਹ ਲਈਏ।"
+    },
+    "fear": {
+        "en": "It's completely normal to feel anxious or scared, {name}. You are in a safe space here.",
+        "pa": "ਚਿੰਤਤ ਜਾਂ ਡਰਿਆ ਹੋਇਆ ਮਹਿਸੂਸ ਕਰਨਾ ਬਿਲਕੁਲ ਆਮ ਗੱਲ ਹੈ, {name}। ਤੁਸੀਂ ਇੱਥੇ ਸੁਰੱਖਿਅਤ ਹੋ।"
+    },
+    "surprise": {
+        "en": "That sounds unexpected, {name}! How are you processing this?",
+        "pa": "ਇਹ ਅਚਾਨਕ ਲੱਗਦਾ ਹੈ, {name}! ਤੁਸੀਂ ਇਸ ਬਾਰੇ ਕੀ ਸੋਚ ਰਹੇ ਹੋ?"
+    },
+    "disgust": {
+        "en": "That sounds really unpleasant, {name}. Let's talk through it if you want.",
+        "pa": "ਇਹ ਬਹੁਤ ਅਣਸੁਖਾਵਾਂ ਲੱਗਦਾ ਹੈ, {name}। ਜੇ ਤੁਸੀਂ ਚਾਹੋ ਤਾਂ ਆਓ ਇਸ ਬਾਰੇ ਗੱਲ ਕਰੀਏ।"
+    },
+    "neutral": {
+        "en": "I'm listening, {name}. How's your day at GNDEC going? Any assignments or exams stressing you out?",
+        "pa": "ਮੈਂ ਸੁਣ ਰਿਹਾ ਹਾਂ, {name}। GNDEC ਵਿੱਚ ਤੁਹਾਡਾ ਦਿਨ ਕਿਵੇਂ ਜਾ ਰਿਹਾ ਹੈ?"
+    }
 }
 
 EMOTION_EMOJIS = {
@@ -54,7 +59,7 @@ EMOTION_EMOJIS = {
 }
 
 EMOTION_COLORS = {
-    "joy": "#FF9933", "sadness": "#4169E1", "anger": "#DC143C", 
-    "fear": "#8B008B", "neutral": "#808080", "surprise": "#FFD700", 
+    "joy": "#FFD700", "sadness": "#4169E1", "anger": "#DC143C", 
+    "fear": "#8B008B", "neutral": "#808080", "surprise": "#FF9933", 
     "disgust": "#006400"
 }

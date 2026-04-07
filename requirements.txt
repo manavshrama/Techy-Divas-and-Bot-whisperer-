@@ -7,3 +7,6 @@ pandas
 SpeechRecognition
 pyttsx3
 fpdf2
+# Note: PyAudio is required for SpeechRecognition mic support
+# On Windows: pip install pipwin then pipwin install pyaudio
+# On Linux: sudo apt-get install python3-pyaudio
