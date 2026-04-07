@@ -67,7 +67,7 @@ docker run -p 8501:8501 mindmitra
 ---
 
 ## 🏆 Hackathon Note
-Built with ❤️ by **Sinamor** in just 8 hours for the GNDEC Ludhiana Hackathon (2026-04-07). Dedicated to the mental wellness of every student walking the halls of Gill Park.
+Built with ❤️ by **Sinamor** in just 8 hours at GNDEC (2026-04-07). Dedicated to the mental wellness of every student walking the halls of Gill Park.
 
 ---
 *Disclaimer: This is an AI companion, not a replacement for professional medical advice.*
