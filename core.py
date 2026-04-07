@@ -1,16 +1,19 @@
 import streamlit as st
 from transformers import pipeline
-from typing import Dict, Tuple, Any
+from typing import Dict, Tuple, Any, List
 import re
 
 # ==========================================
-# CONFIGURATION & SETUP
+# CONFIGURATION & PREMIUM STYLING
 # ==========================================
 
 def setup_page() -> None:
     """
-    Configures the Streamlit page layout, title, and initial styles.
-    Sets up the Indian tricolor (saffron-white-green) gradient header.
+    Configures the Streamlit page with premium aesthetics.
+    Includes:
+    - Wide layout & page icon
+    - Google Fonts (Inter) integration
+    - Custom Tricolor (Saffron-White-Green) Gradient Header
     """
     st.set_page_config(
         page_title="MindMitra GNDEC Edition",
@@ -18,127 +21,185 @@ def setup_page() -> None:
         layout="wide"
     )
 
-    # Tricolor gradient header (Saffron, White, Green) with GNDEC vibes
+    # Injecting modern typography and tricolor vibes
     st.markdown(
         """
         <style>
-        .header-gradient {
-            background: linear-gradient(to right, #FF9933, #FFFFFF, #138808);
+        /* Import Google Fonts for a premium look */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        html, body, [class*="css"] {
+            font-family: 'Inter', sans-serif;
+        }
+
+        .main-header {
+            background: linear-gradient(135deg, #FF9933 0%, #FFFFFF 50%, #138808 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
-            font-size: 3rem;
-            font-weight: bold;
+            font-family: 'Inter', sans-serif;
+            font-size: 3.5rem;
+            font-weight: 800;
             text-align: center;
-            padding: 20px 0;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .sub-header {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #4A4A4A;
+            font-weight: 400;
+            margin-bottom: 2rem;
+            letter-spacing: 1px;
+        }
+
+        /* Smooth glassy divider */
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #ccc, transparent);
+            margin: 20px 0;
         }
         </style>
-        <div class="header-gradient">MindMitra GNDEC Edition ❤️</div>
-        <p style='text-align: center; font-size: 1.2rem; color: #555;'>Your campus mental health companion.</p>
+        
+        <div class="main-header">MindMitra GNDEC Edition ❤️</div>
+        <div class="sub-header">Your empathetic campus companion for the students of Punjab.</div>
+        <div class="divider"></div>
         """,
         unsafe_allow_html=True
     )
 
 # ==========================================
-# MODEL LOADING
+# AI MODEL INFRASTRUCTURE (CACHED)
 # ==========================================
 
-@st.cache_resource(show_spinner="Loading MindMitra's AI model...")
+@st.cache_resource(show_spinner="Connecting to MindMitra's emotional core...")
 def load_emotion_model() -> Any:
     """
-    Loads the DistilRoBERTa emotion detection model and caches it.
-    Caching prevents reloading the large model on every Streamlit rerun.
+    Loads and caches the DistilRoBERTa emotion detection pipeline.
+    Model: j-hartmann/emotion-english-distilroberta-base
+    Labels: joy, sadness, anger, fear, surprise, disgust, neutral
     """
-    # Pipeline for text-classification maps to the 7 core emotions
-    emotion_pipeline = pipeline(
-        "text-classification", 
-        model="j-hartmann/emotion-english-distilroberta-base"
-    )
-    return emotion_pipeline
+    try:
+        emotion_pipe = pipeline(
+            "text-classification", 
+            model="j-hartmann/emotion-english-distilroberta-base"
+        )
+        return emotion_pipe
+    except Exception as e:
+        st.error(f"Error loading emotion model: {e}")
+        return None
 
 # ==========================================
-# DICTIONARIES & HELPLINES
+# BILINGUAL EMOTIONAL INTELLIGENCE
 # ==========================================
 
 def get_emotion_responses() -> Dict[str, str]:
     """
-    Returns a dictionary of empathetic responses paired with emotions.
-    Responses are tailored for Punjab engineering students (English + simple Punjabi mix).
+    Returns a dictionary of empathetic responses in a 'Hinglish/Punjabi' mix.
+    Tailored for the engineering student vibe: warm, informal, and supportive.
     """
     return {
-        "joy": "That's wonderful! Khushi di gal hai! 😊 Keep that positive energy glowing. What made you feel this way today?",
-        "sadness": "I hear you, and it's okay to feel sad. Udas na ho, exams ya assignments di tension ho sakdi hai. Take a deep breath. Would you like to talk more about what's weighing on your mind?",
-        "anger": "It sounds like you're really frustrated right now. Gussa aana natural hai. Panga lain ton pehlan, let's take a step back and vent it out here. I'm listening.",
-        "fear": "It's completely normal to feel anxious or scared, especially with college pressures. Darr lagna aam gal hai. Let's break down what's worrying you together. You're not alone.",
-        "surprise": "Wow, unexpected things can really throw us off! Hairani wali gal theek hai. Take a moment to process it. Is it a good surprise or a stressful one?",
-        "disgust": "I understand that something is really bothering you or feeling unpleasant. Eh gal theek nahi laggi tenu. Do you want to share what made you feel this way?",
-        "neutral": "I'm right here with you. Sab theek chal reha hai? Whether you want to rant about practicals, or just chill, I'm all ears."
+        "joy": (
+            "I'm so happy for you! Khushi di gal hai! 😊 "
+            "Whether it's a cracked interview or a cancelled lecture, you deserve to celebrate. "
+            "Dasna chahonge hor ki hoeya?"
+        ),
+        "sadness": (
+            "I hear you, and it's okay to feel low. Udas na ho mitra. ❤️ "
+            "Engineering life handles a lot—practicals, attendance, stress. "
+            "Take a deep breath. I'm here to listen if you want to vent more."
+        ),
+        "anger": (
+            "That sounds really frustrating. Gussa aana normal hai. 😤 "
+            "Sometimes things just don't go our way. Before you react, try to "
+            "share it all here. I'm listening without any judgment."
+        ),
+        "fear": (
+            "It's completely normal to feel a bit anxious. Darr lagna aam gal hai. "
+            "Whether it's placement season or viva pressure, you've got the strength to face it. "
+            "Let's break down what's worrying you together."
+        ),
+        "surprise": (
+            "Whoa, unexpected change can be a shock! Hairani wali gal hai. 😲 "
+            "Take a second to process it. Is this something you're excited about "
+            "or is it adding to your stress?"
+        ),
+        "disgust": (
+            "I can tell you're really put off by something. Eh gal theek nahi laggi tenu. "
+            "It's important to honor your boundaries. Do you want to process why this "
+            "felt so unpleasant?"
+        ),
+        "neutral": (
+            "I'm right here with you. Sab theek chal reha hai? "
+            "Whether you want to rant about the hostel mess food or just talk about "
+            "your day, I'm all ears. Ki chal reha hai dimaag ch?"
+        )
     }
+
+# ==========================================
+# SAFETY & CRISIS PROTOCOLS
+# ==========================================
 
 def get_crisis_info() -> str:
     """
-    Provides Indian/Punjab emergency helpline information formatted for easy reading.
+    Returns formatted Indian crisis helplines and immediate support resources.
     """
     return (
-        "🚨 **CRISIS ALERT: We are here for you!** 🚨\n\n"
-        "Please remember that you don't have to face this alone. Reach out to someone who can help immediately:\n"
-        "- **KIRAN Mental Health Helpline**: 1800-599-0019 (24x7, Toll-Free)\n"
-        "- **Vandrevala Foundation**: 9999 666 555 (24x7)\n"
-        "- **AASRA**: 9820466726\n"
-        "- **GNDEC Student Counseling Cell**: [Contact your mentor or HOD immediately]\n\n"
-        "*Please talk to a trusted friend, family member, or professional right away. Your life is precious.*"
+        "### 🚨 **CRISIS SUPPORT: Please reach out!** 🚨\n\n"
+        "You are not alone. There is help available right now. Please talk to someone:\n\n"
+        "- **KIRAN Mental Health Helpline**: **1800-599-0019** (24x7, Toll-Free)\n"
+        "- **Vandrevala Foundation**: **9999 666 555** (WhatsApp & Call)\n"
+        "- **AASRA India**: **9820466726**\n"
+        "- **GNDEC Student Counseling Cell**: Please contact your **Mentor or HOD** immediately.\n\n"
+        "--- \n"
+        "*Your life is incredibly precious. Please talk to a trusted friend, family member, or professional right away.*"
     )
-
-# ==========================================
-# CORE LOGIC FUNCTIONS
-# ==========================================
 
 def check_crisis_keywords(user_input: str) -> bool:
     """
-    Checks if the user's input contains any high-risk crisis keywords.
+    Performs a regex-based check for high-risk crisis keywords in user text.
     """
-    crisis_keywords = [
+    crisis_keywords: List[str] = [
         "suicide", "kill myself", "want to die", "end my life", 
-        "worthless", "give up", "harm myself", "no reason to live"
+        "worthless", "give up", "harm myself", "no reason to live",
+        "marna chahunda", "jaan deni" 
     ]
     
-    # Convert input to lowercase for case-insensitive matching
     text_lower = user_input.lower()
     
     for word in crisis_keywords:
-        # Check for complete word matches
         if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
             return True
             
     return False
 
+# MAIN LOGIC WRAPPER
+
+
 def analyze_and_respond(user_input: str, emotion_model: Any) -> Tuple[str, str, bool]:
     """
-    Processes the user input systematically:
-    1. Checks for crisis keywords first.
-    2. Analyzes emotions if no crisis is detected.
-    3. Generates an empathetic, bilingual response.
+    Systematically processes user input:
+    1. Crisis Check (Priority)
+    2. Emotion Analysis (via Transformer)
+    3. Response Generation (Bilingual)
     
     Returns:
-        Tuple containing (emotion_label, response_text, is_crisis)
+        tuple: (emotion_label, response_text, is_crisis_detected)
     """
-    # 1. Prioritize Crisis Check
     is_crisis = check_crisis_keywords(user_input)
     if is_crisis:
         return ("critical", get_crisis_info(), True)
+    
+    if not emotion_model:
+        return ("neutral", "I'm here for you, but my emotional core is resting. How are you feeling?", False)
         
-    # 2. Emotion Analysis
     try:
         results = emotion_model(user_input)
-        # Results format typically: [{'label': 'joy', 'score': 0.99}]
-        predicted_emotion = results[0]['label']
+        predicted_label = results[0]['label'].lower()
     except Exception:
-        # Fallback to neutral in case of inference error
-        predicted_emotion = "neutral"
+        predicted_label = "neutral"
         
-    # 3. Response Generation
     responses = get_emotion_responses()
-    # Default to neutral if the model outputs something unexpected
-    response_text = responses.get(predicted_emotion, responses["neutral"])
+    response_text = responses.get(predicted_label, responses["neutral"])
     
-    return (predicted_emotion, response_text, False)
+    return (predicted_label, response_text, False)
