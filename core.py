@@ -1,227 +1,249 @@
 # 🧡 ==========================================
-# 🧡 SAFFRON: MINDMITRA GNDEC EDITION - SETUP
+# 🧡 MINDMITRA: GNDEC EDITION - UPDATED SKELETON
 # 🧡 ==========================================
-# 🤍 Run the following command in a Colab cell to install dependencies:
-# 🤍 !pip install streamlit transformers torch plotly pandas speechrecognition pyttsx3 localtunnel
-# 💚 ==========================================
-# 💚 GREEN: READY FOR VIBE CODING AT GNDEC
+# 🤍 Built for the students of Guru Nanak Dev Engineering College, Ludhiana.
 # 💚 ==========================================
 
 import streamlit as st
 from transformers import pipeline
-from typing import Dict, Tuple, Any, List
+from typing import Dict, List, Any, Tuple
 import re
+import time
+import plotly.express as px
+import pandas as pd
 
 # ==========================================
-# CONFIGURATION & PREMIUM STYLING
+# 🎨 UI & PAGE CONFIGURATION
 # ==========================================
 
-def setup_page() -> None:
+def setup_page():
     """
-    Configures the Streamlit page with premium aesthetics.
-    Includes:
-    - Wide layout & page icon
-    - Google Fonts (Inter) integration
-    - Custom Tricolor (Saffron-White-Green) Gradient Header
+    Configures the MindMitra UI with a Saffron-White-Green vibe.
     """
     st.set_page_config(
-        page_title="MindMitra GNDEC Edition",
+        page_title="MindMitra: GNDEC Student Companion",
         page_icon="❤️",
         layout="wide"
     )
 
-    # Injecting modern typography and tricolor vibes
+    # Custom CSS for the Saffron-White-Green Gradient Header & Chat Styles
     st.markdown(
         """
         <style>
-        /* Import Google Fonts for a premium look */
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-
-        html, body, [class*="css"] {
-            font-family: 'Inter', sans-serif;
+        .stApp {
+            background-color: #f8f9fa;
         }
-
-        .main-header {
-            background: linear-gradient(135deg, #FF9933 0%, #FFFFFF 50%, #138808 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-family: 'Inter', sans-serif;
+        .header-container {
+            background: linear-gradient(90deg, #FF9933 0%, #FFFFFF 50%, #138808 100%);
+            padding: 2.5rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .header-title {
+            color: #1e1e1e;
             font-size: 3.5rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 0.5rem;
-            text-shadow: 2px 4px 6px rgba(0,0,0,0.05);
+            font-weight: 900;
+            margin: 0;
+            font-family: 'Inter', sans-serif;
         }
-
-        .sub-header {
-            text-align: center;
-            font-size: 1.2rem;
-            color: #4A4A4A;
-            font-weight: 400;
-            margin-bottom: 2rem;
-            letter-spacing: 1px;
+        .header-subtitle {
+            color: #333;
+            font-size: 1.3rem;
+            margin-top: 10px;
+            font-weight: 500;
         }
-
-        /* Smooth glassy divider */
-        .divider {
-            height: 2px;
-            background: linear-gradient(to right, transparent, #ccc, transparent);
-            margin: 20px 0;
+        .chat-container {
+            max-width: 800px;
+            margin: auto;
+        }
+        /* Custom sidebar styling */
+        [data-testid="stSidebar"] {
+            background-color: #ffffff;
+            border-right: 1px solid #e1e4e8;
         }
         </style>
-        
-        <div class="main-header">MindMitra GNDEC Edition ❤️</div>
-        <div class="sub-header">Your empathetic campus companion for the students of Punjab.</div>
-        <div class="divider"></div>
+        <div class="header-container">
+            <h1 class="header-title">GNDEC Ludhiana Student Mental Health Companion ❤️</h1>
+            <p class="header-subtitle">Ludhiana's first AI Mitra for campus stress, exam anxiety, and much more.</p>
+        </div>
         """,
         unsafe_allow_html=True
     )
 
 # ==========================================
-# AI MODEL INFRASTRUCTURE (CACHED)
+# 🧠 AI EMOTION ENGINE
 # ==========================================
 
+# Entering the GNDEC emotional zone - where Gill Road meets mental wellness.
 @st.cache_resource(show_spinner="Connecting to MindMitra's emotional core...")
-def load_emotion_model() -> Any:
+def initialize_feelings() -> Any:
     """
-    Loads and caches the DistilRoBERTa emotion detection pipeline.
-    Model: j-hartmann/emotion-english-distilroberta-base
+    Loads the emotion analysis model.
+    Using: j-hartmann/emotion-english-distilroberta-base
     """
     try:
-        emotion_pipe = pipeline(
-            "text-classification", 
+        feel_detector = pipeline(
+            "text-classification",
             model="j-hartmann/emotion-english-distilroberta-base"
         )
-        return emotion_pipe
+        return feel_detector
     except Exception as e:
-        st.error(f"Error loading emotion model: {e}")
+        st.error(f"Error connecting to heart: {e}")
         return None
 
-# ==========================================
-# BILINGUAL EMOTIONAL INTELLIGENCE
-# ==========================================
-
-def get_emotion_responses() -> Dict[str, str]:
+def detect_emotion(user_text: str, detector: Any) -> Tuple[str, str]:
     """
-    Returns a dictionary of empathetic responses in a 'Hinglish/Punjabi' mix.
+    Detects the primary emotion in given text and returns with emoji.
     """
-    return {
-        "joy": (
-            "I'm so happy for you! Khushi di gal hai! 😊 "
-            "Whether it's a cracked interview or a cancelled lecture, you deserve to celebrate."
-        ),
-        "sadness": (
-            "I hear you, and it's okay to feel low. Udas na ho mitra. ❤️ "
-            "Engineering life handles a lot—practicals, attendance, stress."
-        ),
-        "anger": "That sounds really frustrating. Gussa aana normal hai. 😤",
-        "fear": "It's completely normal to feel a bit anxious. Darr lagna aam gal hai.",
-        "surprise": "Whoa, unexpected change can be a shock! Hairani wali gal hai. 😲",
-        "disgust": "I can tell you're really put off by something. Eh gal theek nahi laggi tenu.",
-        "neutral": "I'm right here with you. Sab theek chal reha hai?"
+    if not detector:
+        return "neutral", "😐"
+    
+    emoji_map = {
+        "joy": "😊", "sadness": "😢", "anger": "😤", 
+        "fear": "😨", "surprise": "😲", "disgust": "🤢", "neutral": "😐"
     }
-
-# ==========================================
-# SAFETY & CRISIS PROTOCOLS
-# ==========================================
-
-def get_crisis_info() -> str:
-    """Returns formatted Indian crisis helplines."""
-    return (
-        "### 🚨 **CRISIS SUPPORT: Please reach out!** 🚨\n"
-        "- **KIRAN Helpline**: **1800-599-0019** (24x7)\n"
-        "- **Vandrevala**: **9999 666 555**\n"
-        "--- \n"
-        "*Your life is incredibly precious.*"
-    )
-
-def check_crisis_keywords(user_input: str) -> bool:
-    """Checks for high-risk crisis keywords."""
-    crisis_keywords: List[str] = ["suicide", "kill myself", "want to die", "marna chahunda"]
-    text_lower = user_input.lower()
-    for word in crisis_keywords:
-        if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
-            return True
-    return False
-
-def analyze_and_respond(user_input: str, emotion_model: Any) -> Tuple[str, str, bool]:
-    """Processes user input for emotions and crisis."""
-    is_crisis = check_crisis_keywords(user_input)
-    if is_crisis:
-        return ("critical", get_crisis_info(), True)
     
-    if not emotion_model:
-        return ("neutral", "How are you feeling?", False)
-        
     try:
-        results = emotion_model(user_input)
-        predicted_label = results[0]['label'].lower()
+        feelings_raw = detector(user_text)
+        mood_tag = feelings_raw[0]['label'].lower()
+        return mood_tag, emoji_map.get(mood_tag, "😐")
     except Exception:
-        predicted_label = "neutral"
-        
-    responses = get_emotion_responses()
-    response_text = responses.get(predicted_label, responses["neutral"])
-    
-    return (predicted_label, response_text, False)
+        return "neutral", "😐"
 
 # ==========================================
-# MAIN EXECUTION: THE VIBE BEGINS HERE
+# 💬 EMOTIONAL RESPONSES & REASONING
 # ==========================================
 
-def main():
-    # 1. Initialize Aesthetics
-    setup_page()
-    
-    # 2. Sidebar for GNDEC Pride & Info
+EMOTION_RESPONSES: Dict[str, str] = {
+    "joy": "Paaji chak de phatte! I'm so happy for you. This calls for a treat at the canteen! 🥳",
+    "sadness": "Oho, dil chhota na kar mitra. Life has ups and downs, but GNDEC students are tough. We are in this together. ❤️",
+    "anger": "I hear you, gussa aana natural hai. Take a deep breath. Focus on what we can control right now. 😤",
+    "fear": "Darr lagna normal hai, especially with exams or placements. But remember, you've handled tough stuff before. Tention na lo. 👣",
+    "surprise": "Whoa! Hairani wali gal hai! 😲 Sudden changes can be a lot, but let's see how we can handle this.",
+    "disgust": "Eh gal bilkul theek nahi laggi. I understand why you're feeling this way. Speak your heart out. 🤐",
+    "neutral": "I'm just vibing here with you. Tusi daso, hor ki chal reha campus te? Everything okay? 🤔"
+}
+
+CRISIS_KEYWORDS: List[str] = [
+    "suicide", "kill myself", "want to die", "marna chahunda", "end it all",
+    "self harm", "help me", "emergency", "zindagi khatam"
+]
+
+def check_crisis(text: str) -> bool:
+    danger_check = False
+    text_clean = text.lower()
+    for word in CRISIS_KEYWORDS:
+        if re.search(r'\b' + re.escape(word) + r'\b', text_clean):
+            danger_check = True
+            break
+    return danger_check
+
+# ==========================================
+# 📊 SIDEBAR COMPONENT: YOUR MOOD JOURNEY
+# ==========================================
+
+def render_sidebar():
     with st.sidebar:
-        st.title("🧡 MindMitra Info")
-        st.info("Built specifically for the students of Guru Nanak Dev Engineering College.")
+        st.title("🧡 Your Mood Journey")
         st.markdown("---")
-        st.write("**Model:** DistilRoBERTa Emotion")
-        st.write("**Language:** Bilingual Support")
-        if st.button("Clear Chat History"):
+        
+        if st.session_state.mood_history:
+            # Prepare data for Plotly pie chart
+            mood_df = pd.DataFrame(st.session_state.mood_history, columns=["Mood"])
+            mood_counts = mood_df["Mood"].value_counts().reset_index()
+            mood_counts.columns = ["Mood", "Count"]
+
+            # Slightly changed Plotly colors as requested (Saffron, White-ish, Green)
+            custom_colors = ['#FF8C00', '#F5F5F5', '#228B22', '#FFD700', '#A9A9A9', '#CD5C5C']
+            
+            fig = px.pie(
+                mood_counts, 
+                values='Count', 
+                names='Mood', 
+                title='Feelings Overview',
+                color_discrete_sequence=custom_colors,
+                hole=0.4
+            )
+            fig.update_layout(showlegend=False)
+            st.plotly_chart(fig, use_container_width=True)
+
+            # Last 5 feelings
+            st.subheader("Last 5 Feelings")
+            for mood in st.session_state.mood_history[-5:][::-1]:
+                st.write(f"- {mood.title()}")
+        else:
+            st.info("Start chatting to track your journey!")
+            
+        st.markdown("---")
+        if st.button("Reset Everything"):
             st.session_state.messages = []
+            st.session_state.mood_history = []
             st.rerun()
 
-    # 3. Load Model (Cached)
-    emotion_model = load_emotion_model()
+# ==========================================
+# 🚀 MAIN APP EXECUTION
+# ==========================================
+
+def display_typing_effect(text: str):
+    """Adds a simple typing animation for replies."""
+    message_placeholder = st.empty()
+    full_response = ""
+    for char in text:
+        full_response += char
+        message_placeholder.markdown(full_response + "▌")
+        time.sleep(0.01)
+    message_placeholder.markdown(full_response)
+
+def main():
+    setup_page()
     
-    # 4. Initialize Local Chat State
+    # Initialize session states
     if "messages" not in st.session_state:
         st.session_state.messages = []
+    if "mood_history" not in st.session_state:
+        st.session_state.mood_history = []
 
-    # 5. Display Historic Conversations
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+    # Initialize Sidebar
+    render_sidebar()
+    
+    # Initialize AI
+    feel_detector = initialize_feelings()
+    
+    # Display Chat History
+    for msg in st.session_state.messages:
+        with st.chat_message(msg["role"]):
+            st.markdown(msg["content"])
+            if "mood" in msg:
+                st.caption(f"Detected: {msg['mood']}")
 
-    # 6. Chat Input Logic
-    if prompt := st.chat_input("Shubh swera! Kaun si gal karni hai?... (I'm listening...)"):
-        # Display user message
+    # User Input
+    if prompt := st.chat_input("Kaun si gal karni hai, mitra? (Type here...)"):
+        # Display User Message
         st.session_state.messages.append({"role": "user", "content": prompt})
         with st.chat_message("user"):
             st.markdown(prompt)
 
-        # Process and Predict
-        with st.spinner("MindMitra is listening carefully..."):
-            predicted_label, response_text, is_crisis = analyze_and_respond(prompt, emotion_model)
+        # Real-time Detection
+        if check_crisis(prompt):
+            mitra_bol = "### 🚨 Please reach out: **KIRAN Helpline (1800-599-0019)**. You are precious!."
+            mood_label, emoji = "crisis", "❗"
+        else:
+            mood_label, emoji = detect_emotion(prompt, feel_detector)
+            mitra_bol = EMOTION_RESPONSES.get(mood_label, EMOTION_RESPONSES["neutral"])
+            st.session_state.mood_history.append(mood_label)
 
-        # Display Response
+        # Display Assistant Message
         with st.chat_message("assistant"):
-            st.markdown(response_text)
-            # Subtle tricolor indicator for the 'vibe'
-            if not is_crisis:
-                color_map = {
-                    "joy": "orange",
-                    "sadness": "blue",
-                    "anger": "red",
-                    "fear": "purple",
-                    "neutral": "grey"
-                }
-                vibe_color = color_map.get(predicted_label, "grey")
-                st.caption(f":{vibe_color}[Current Emotional Vibe: {predicted_label.title()}]")
+            display_typing_effect(mitra_bol)
+            st.caption(f"Current Vibe: {mood_label.title()} {emoji}")
             
-        st.session_state.messages.append({"role": "assistant", "content": response_text})
+        st.session_state.messages.append({
+            "role": "assistant", 
+            "content": mitra_bol, 
+            "mood": f"{mood_label.title()} {emoji}"
+        })
 
 if __name__ == "__main__":
     main()
