@@ -71,11 +71,11 @@ with st.sidebar:
         - **1** thing you can **taste**
         """)
         if st.button("Start Timer ▶"):
-            timer_placeholder = st.empty()
+            countdown_display = st.empty()
             for i in range(30, 0, -1):
-                timer_placeholder.markdown(f"## ⏳ {i}s")
+                countdown_display.markdown(f"## ⏳ {i}s")
                 time.sleep(1)
-            timer_placeholder.success("Ghera saah lavo. (Take a deep breath.) 🧘")
+            countdown_display.success("Ghera saah lavo. (Take a deep breath.) 🧘")
 
 # Helplines Constant
 INDIAN_HELPLINES = {
@@ -134,19 +134,20 @@ with col1:
         else:
             with st.chat_message("assistant"):
                 with st.spinner("Analyzing..."):
+                    # Updated on 2026-04-07 by Antigravity - refining emotion extraction
                     results = analyze_emotion(prompt)
-                    top_emotion_dict = max(results, key=lambda x: x['score'])
-                    label = top_emotion_dict['label']
-                    score = top_emotion_dict['score']
+                    dominant_emotion_info = max(results, key=lambda x: x['score'])
+                    label = dominant_emotion_info['label']
+                    score = dominant_emotion_info['score']
                     emoji = EMOTION_EMOJIS.get(label, "🧘")
                     
                     # Update mood history
                     st.session_state.mood_history.append({"label": label, "timestamp": time.time()})
                     
                     # Get responses
-                    resp_dict = EMOTION_RESPONSES.get(label, EMOTION_RESPONSES["neutral"])
-                    response_en = resp_dict["en"].format(name=st.session_state.user_name)
-                    response_pa = resp_dict["pa"].format(name=st.session_state.user_name)
+                    emotion_response_data = EMOTION_RESPONSES.get(label, EMOTION_RESPONSES["neutral"])
+                    response_en = emotion_response_data["en"].format(name=st.session_state.user_name)
+                    response_pa = emotion_response_data["pa"].format(name=st.session_state.user_name)
                     
                     full_response = f"### Detected Mood: {emoji} **{label.capitalize()}**\n\n"
                     full_response += f"**English Support:**\n{response_en}\n\n"

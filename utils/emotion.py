@@ -16,7 +16,7 @@ def analyze_emotion(text):
     return results[0] # returns list of dictionaries
 
 def check_crisis(text):
-    keywords = ["suicide", "kill myself", "end my life", "harm myself", "worthless", "dying", "won't wake up", "marna", "muat", "vadhna"]
+    keywords = ["suicide", "kill myself", "end my life", "ending it", "harm myself", "worthless", "dying", "won't wake up", "marna", "muat", "vadhna"]
     text_lower = text.lower()
     for word in keywords:
         if word in text_lower:

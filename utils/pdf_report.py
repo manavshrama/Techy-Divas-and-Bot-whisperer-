@@ -9,7 +9,9 @@ def generate_pdf_report(session_summary):
     pdf.ln(10)
     
     pdf.set_font("Arial", size=12)
-    pdf.multi_cell(0, 10, text=session_summary)
+    # FPDF default font doesn't support unicode (Punjabi/Emojis), so we replace them
+    safe_summary = session_summary.encode('latin-1', 'replace').decode('latin-1')
+    pdf.multi_cell(0, 10, text=safe_summary)
     
     # We use bytearray which is compatible with streamlit download button
     return pdf.output()
