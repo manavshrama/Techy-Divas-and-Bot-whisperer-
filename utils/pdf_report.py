@@ -1,4 +1,4 @@
-# Sinamor — Secure PDF Generator
+# Manav — Secure PDF Generator
 # FPDF2 wrapper. Streamlit expects bytearrays for the download button.
 
 from fpdf import FPDF

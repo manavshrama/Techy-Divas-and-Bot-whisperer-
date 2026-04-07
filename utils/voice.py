@@ -1,4 +1,4 @@
-# Sinamor — Graceful Voice Fallback implementation
+# Manav — Graceful Voice Fallback implementation
 # Handles cases where PyAudio is missing, missing mics, or timeouts seamlessly.
 
 import speech_recognition as sr

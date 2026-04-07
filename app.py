@@ -1,4 +1,4 @@
-# Sinamor — MindMitra GNDEC Edition
+# Manav — MindMitra GNDEC Edition
 # Built during 8-hour hackathon at GNDEC Ludhiana, 2026-04-07
 # "Code karo, chai piyo, mental health sambhalo"
 
@@ -124,7 +124,7 @@ if "user_alias" not in st.session_state:
 
 
 def stream_words(text, pace=0.018):
-    """Yields words one-by-one for a natural typing effect — Sinamor's fav trick"""
+    """Yields words one-by-one for a natural typing effect — Manav's fav trick"""
     for word in text.split(" "):
         yield word + " "
         time.sleep(pace)
@@ -261,7 +261,7 @@ with col_chat:
                 with st.spinner("Reflecting…"):
                     emotions = analyze_emotion(user_input)
 
-                    # Sinamor: renamed to feel natural
+                    # Manav: renamed to feel natural
                     top_vibe = max(emotions, key=lambda e: e["score"])
                     lbl = top_vibe["label"]
                     conf = top_vibe["score"]
@@ -354,7 +354,7 @@ with col_insights:
 # ── Footer ───────────────────────────────────────────────────
 st.markdown("""
 <div class="mm-footer">
-    Built with ❤️ by <b>Sinamor</b> @ GNDEC Ludhiana &nbsp;|&nbsp;
+    Built with ❤️ by <b>Manav</b> @ GNDEC Ludhiana &nbsp;|&nbsp;
     Privacy first: zero data stored on servers.
 </div>
 """, unsafe_allow_html=True)

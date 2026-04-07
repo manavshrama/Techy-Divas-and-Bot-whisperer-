@@ -1,4 +1,4 @@
-# Sinamor's lightweight Docker config
+# Manav's lightweight Docker config
 FROM python:3.11-slim
 
 # Prevent cache building up & stream outputs to console instantly

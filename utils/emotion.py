@@ -1,4 +1,4 @@
-# Sinamor — emotion engine for MindMitra
+# Manav — emotion engine for MindMitra
 # Using j-hartmann's distilroberta for 7-class emotion detection
 # Cached so we don't reload 250MB model on every rerun
 
@@ -28,7 +28,7 @@ def analyze_emotion(text: str) -> list:
 def check_crisis(text: str) -> bool:
     """
     Hard-coded keyword guard. This runs BEFORE the ML model.
-    Sinamor: intentionally keeping this rule-based — no model should
+    Manav: intentionally keeping this rule-based — no model should
     be trusted alone for suicide detection in a hackathon prototype.
     """
     danger_phrases = [
@@ -45,7 +45,7 @@ def check_crisis(text: str) -> bool:
 
 
 # ── Bilingual Response Bank ──────────────────────────────────
-# Sinamor: kept the tone warm but not clinical — students hate
+# Manav: kept the tone warm but not clinical — students hate
 # feeling like they're talking to a therapist bot
 
 EMOTION_RESPONSES = {
