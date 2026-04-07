@@ -1,3 +1,12 @@
+# 🧡 ==========================================
+# 🧡 SAFFRON: MINDMITRA GNDEC EDITION - SETUP
+# 🧡 ==========================================
+# 🤍 Run the following command in a Colab cell to install dependencies:
+# 🤍 !pip install streamlit transformers torch plotly pandas speechrecognition pyttsx3 localtunnel
+# 💚 ==========================================
+# 💚 GREEN: READY FOR VIBE CODING AT GNDEC
+# 💚 ==========================================
+
 import streamlit as st
 from transformers import pipeline
 from typing import Dict, Tuple, Any, List
@@ -77,7 +86,6 @@ def load_emotion_model() -> Any:
     """
     Loads and caches the DistilRoBERTa emotion detection pipeline.
     Model: j-hartmann/emotion-english-distilroberta-base
-    Labels: joy, sadness, anger, fear, surprise, disgust, neutral
     """
     try:
         emotion_pipe = pipeline(
@@ -96,44 +104,21 @@ def load_emotion_model() -> Any:
 def get_emotion_responses() -> Dict[str, str]:
     """
     Returns a dictionary of empathetic responses in a 'Hinglish/Punjabi' mix.
-    Tailored for the engineering student vibe: warm, informal, and supportive.
     """
     return {
         "joy": (
             "I'm so happy for you! Khushi di gal hai! 😊 "
-            "Whether it's a cracked interview or a cancelled lecture, you deserve to celebrate. "
-            "Dasna chahonge hor ki hoeya?"
+            "Whether it's a cracked interview or a cancelled lecture, you deserve to celebrate."
         ),
         "sadness": (
             "I hear you, and it's okay to feel low. Udas na ho mitra. ❤️ "
-            "Engineering life handles a lot—practicals, attendance, stress. "
-            "Take a deep breath. I'm here to listen if you want to vent more."
+            "Engineering life handles a lot—practicals, attendance, stress."
         ),
-        "anger": (
-            "That sounds really frustrating. Gussa aana normal hai. 😤 "
-            "Sometimes things just don't go our way. Before you react, try to "
-            "share it all here. I'm listening without any judgment."
-        ),
-        "fear": (
-            "It's completely normal to feel a bit anxious. Darr lagna aam gal hai. "
-            "Whether it's placement season or viva pressure, you've got the strength to face it. "
-            "Let's break down what's worrying you together."
-        ),
-        "surprise": (
-            "Whoa, unexpected change can be a shock! Hairani wali gal hai. 😲 "
-            "Take a second to process it. Is this something you're excited about "
-            "or is it adding to your stress?"
-        ),
-        "disgust": (
-            "I can tell you're really put off by something. Eh gal theek nahi laggi tenu. "
-            "It's important to honor your boundaries. Do you want to process why this "
-            "felt so unpleasant?"
-        ),
-        "neutral": (
-            "I'm right here with you. Sab theek chal reha hai? "
-            "Whether you want to rant about the hostel mess food or just talk about "
-            "your day, I'm all ears. Ki chal reha hai dimaag ch?"
-        )
+        "anger": "That sounds really frustrating. Gussa aana normal hai. 😤",
+        "fear": "It's completely normal to feel a bit anxious. Darr lagna aam gal hai.",
+        "surprise": "Whoa, unexpected change can be a shock! Hairani wali gal hai. 😲",
+        "disgust": "I can tell you're really put off by something. Eh gal theek nahi laggi tenu.",
+        "neutral": "I'm right here with you. Sab theek chal reha hai?"
     }
 
 # ==========================================
@@ -141,57 +126,32 @@ def get_emotion_responses() -> Dict[str, str]:
 # ==========================================
 
 def get_crisis_info() -> str:
-    """
-    Returns formatted Indian crisis helplines and immediate support resources.
-    """
+    """Returns formatted Indian crisis helplines."""
     return (
-        "### 🚨 **CRISIS SUPPORT: Please reach out!** 🚨\n\n"
-        "You are not alone. There is help available right now. Please talk to someone:\n\n"
-        "- **KIRAN Mental Health Helpline**: **1800-599-0019** (24x7, Toll-Free)\n"
-        "- **Vandrevala Foundation**: **9999 666 555** (WhatsApp & Call)\n"
-        "- **AASRA India**: **9820466726**\n"
-        "- **GNDEC Student Counseling Cell**: Please contact your **Mentor or HOD** immediately.\n\n"
+        "### 🚨 **CRISIS SUPPORT: Please reach out!** 🚨\n"
+        "- **KIRAN Helpline**: **1800-599-0019** (24x7)\n"
+        "- **Vandrevala**: **9999 666 555**\n"
         "--- \n"
-        "*Your life is incredibly precious. Please talk to a trusted friend, family member, or professional right away.*"
+        "*Your life is incredibly precious.*"
     )
 
 def check_crisis_keywords(user_input: str) -> bool:
-    """
-    Performs a regex-based check for high-risk crisis keywords in user text.
-    """
-    crisis_keywords: List[str] = [
-        "suicide", "kill myself", "want to die", "end my life", 
-        "worthless", "give up", "harm myself", "no reason to live",
-        "marna chahunda", "jaan deni" 
-    ]
-    
+    """Checks for high-risk crisis keywords."""
+    crisis_keywords: List[str] = ["suicide", "kill myself", "want to die", "marna chahunda"]
     text_lower = user_input.lower()
-    
     for word in crisis_keywords:
         if re.search(r'\b' + re.escape(word) + r'\b', text_lower):
             return True
-            
     return False
 
-# MAIN LOGIC WRAPPER
-
-
 def analyze_and_respond(user_input: str, emotion_model: Any) -> Tuple[str, str, bool]:
-    """
-    Systematically processes user input:
-    1. Crisis Check (Priority)
-    2. Emotion Analysis (via Transformer)
-    3. Response Generation (Bilingual)
-    
-    Returns:
-        tuple: (emotion_label, response_text, is_crisis_detected)
-    """
+    """Processes user input for emotions and crisis."""
     is_crisis = check_crisis_keywords(user_input)
     if is_crisis:
         return ("critical", get_crisis_info(), True)
     
     if not emotion_model:
-        return ("neutral", "I'm here for you, but my emotional core is resting. How are you feeling?", False)
+        return ("neutral", "How are you feeling?", False)
         
     try:
         results = emotion_model(user_input)
