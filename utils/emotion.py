@@ -12,7 +12,8 @@ def _load_emotion_pipeline():
     return pipeline(
         "text-classification",
         model="j-hartmann/emotion-english-distilroberta-base",
-        return_all_scores=True
+        return_all_scores=True,
+        framework="pt"
     )
 
 
