@@ -1,199 +1,132 @@
 # Sinamor
-# Sinamor: Setting up the vibe with a wide layout and a green heart 💚
-# Sinamor: The tricolor header is a must! Punjab represent, India represent!
-# Sinamor: Every GNDEC student should feel at home when they open this. 🧘‍♂️
-
 import streamlit as st
 import os
 import pandas as pd
 import plotly.express as px
-import datetime
-import time
-from utils.emotion import analyze_emotion, get_top_emotion, check_crisis, EMOTION_RESPONSES, EMOTION_EMOJIS, EMOTION_COLORS
+from utils.emotion import analyze_emotion
+from utils.pdf_report import generate_pdf_report
+from utils.voice import speech_to_text, text_to_speech
 
 # Set page config
-st.set_page_config(
-    page_title="MindMitra GNDEC", 
-    page_icon="💚", 
-    layout="wide"
-)
+st.set_page_config(page_title="MindMitra GNDEC Edition", page_icon="🧘", layout="wide")
 
-# Sinamor: 1. Initialize session state
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-if "mood_history" not in st.session_state:
-    st.session_state.mood_history = []
-if "user_name" not in st.session_state:
-    st.session_state.user_name = "Yaar"
-
-# Custom CSS (Sinamor's Personal Touch)
 st.markdown("""
-<style>
-    /* Sidebar Styling */
-    [data-testid="stSidebar"] {
-        background-color: #FFF3E0;
-    }
-    
-    /* Chat Input Border */
-    .stChatInputContainer {
-        border: 2px solid #FF9933 !important;
-    }
-    
-    /* Message Bubbles */
-    [data-testid="stChatMessage"]:nth-child(even) { /* Bot */
-        background-color: #F0FFF0;
-        border-radius: 15px;
-    }
-    [data-testid="stChatMessage"]:nth-child(odd) { /* User */
-        background-color: #FFF8F0;
-        border-radius: 15px;
-    }
-    
-    /* Sinamor's Touch: Animated Header Pulse */
-    @keyframes pulse {
-        0% { opacity: 0.8; }
-        50% { opacity: 1; }
-        100% { opacity: 0.8; }
-    }
-    .stHeader {
-        animation: pulse 3s infinite ease-in-out;
-    }
-    
-    /* Footer Styling */
-    .footer {
-        color: gray;
-        text-align: center;
-        font-size: 0.8em;
-        margin-top: 50px;
-        padding: 20px;
-    }
-</style>
-""", unsafe_allow_html=True)
-
-# Custom HTML Header
-st.markdown("""
-<div style="background: linear-gradient(90deg, #FF9933 0%, #FFFFFF 50%, #138808 100%); 
-            padding: 20px; border-radius: 10px; border: 2px solid #ccc; text-align: center; margin-bottom: 25px;">
-    <h1 style="color: #000080; margin: 0; font-family: 'Inter', sans-serif;">MindMitra GNDEC Edition 🧘</h1>
-    <p style="color: #333333; font-weight: bold; margin: 5px 0 0 0;">Dedicated to the Mental Wellness of Ludhiana Students</p>
+<div style="background: linear-gradient(to right, #FF9933, #FFFFFF, #138808); padding: 10px; border-radius: 5px; text-align: center;">
+    <h1 style="color: black;">MindMitra GNDEC Edition 🧘</h1>
+    <p style="color: black; font-weight: bold;">Empowering GNDEC Ludhiana Engineering Students</p>
 </div>
 """, unsafe_allow_html=True)
 
-# Helplines Constant
-INDIAN_HELPLINES = {
-    "Vandrevala Foundation": "9999666555",
-    "AASRA": "9820466726",
-    "iCall": "9152987821",
-    "NIMHANS": "08046110007"
+# Bilingual Response Dictionary for common emotions
+RESPONSES = {
+    "joy": {
+        "en": "I'm so glad you're feeling good! Keep up the positive energy. What's making you feel this way?",
+        "pa": "ਮੈਨੂੰ ਬਹੁਤ ਖੁਸ਼ੀ ਹੈ ਕਿ ਤੁਸੀਂ ਚੰਗਾ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ! ਇਸ ਸਕਾਰਾਤਮਕ ਊਰਜਾ ਨੂੰ ਬਣਾਈ ਰੱਖੋ।"
+    },
+    "sadness": {
+        "en": "I hear that you're feeling down. It's okay to feel this way sometimes. Remember, this too shall pass.",
+        "pa": "ਮੈਂ ਸਮਝਦਾ ਹਾਂ ਕਿ ਤੁਸੀਂ ਉਦਾਸ ਮਹਿਸੂਸ ਕਰ ਰਹੇ ਹੋ। ਕਦੇ ਕਦੇ ਅਜਿਹਾ ਮਹਿਸੂਸ ਕਰਨਾ ਠੀਕ ਹੈ। ਯਾਦ ਰੱਖੋ, ਇਹ ਸਮਾਂ ਵੀ ਲੰਘ ਜਾਵੇਗਾ।"
+    },
+    "anger": {
+        "en": "It sounds like you're really frustrated right now. Let's take a deep breath together.",
+        "pa": "ਲੱਗਦਾ ਹੈ ਤੁਸੀਂ ਬਹੁਤ ਗੁੱਸੇ ਵਿੱਚ ਹੋ। ਆਓ ਇਕੱਠੇ ਲੰਬਾ ਸਾਹ ਲਈਏ।"
+    },
+    "fear": {
+        "en": "It's completely normal to feel anxious or scared. You are in a safe space here.",
+        "pa": "ਚਿੰਤਤ ਜਾਂ ਡਰਿਆ ਹੋਇਆ ਮਹਿਸੂਸ ਕਰਨਾ ਬਿਲਕੁਲ ਆਮ ਗੱਲ ਹੈ। ਤੁਸੀਂ ਇੱਥੇ ਸੁਰੱਖਿਅਤ ਹੋ।"
+    },
+    "surprise": {
+        "en": "That sounds unexpected! How are you processing this?",
+        "pa": "ਇਹ ਅਚਾਨਕ ਲੱਗਦਾ ਹੈ! ਤੁਸੀਂ ਇਸ ਬਾਰੇ ਕੀ ਸੋਚ ਰਹੇ ਹੋ?"
+    },
+    "disgust": {
+        "en": "That sounds really unpleasant. Let's talk through it if you want.",
+        "pa": "ਇਹ ਬਹੁਤ ਅਣਸੁਖਾਵਾਂ ਲੱਗਦਾ ਹੈ। ਜੇ ਤੁਸੀਂ ਚਾਹੋ ਤਾਂ ਆਓ ਇਸ ਬਾਰੇ ਗੱਲ ਕਰੀਏ।"
+    },
+    "neutral": {
+        "en": "I'm listening. How's your day at GNDEC going? Any assignments or exams stressing you out?",
+        "pa": "ਮੈਂ ਸੁਣ ਰਿਹਾ ਹਾਂ। GNDEC ਵਿੱਚ ਤੁਹਾਡਾ ਦਿਨ ਕਿਵੇਂ ਜਾ ਰਿਹਾ ਹੈ?"
+    }
 }
 
-# Sinamor: 3. Sidebar with Grounding Exercise and Mood Journey
-with st.sidebar:
-    st.title("Tera Mood Journey 📊")
-    st.metric("Total Conversations", len(st.session_state.messages) // 2)
-    
-    if st.session_state.mood_history:
-        mood_df = pd.DataFrame(st.session_state.mood_history)
-        fig = px.pie(
-            mood_df, 
-            names='emotion', 
-            title='Mood Distribution',
-            color='emotion',
-            color_discrete_map=EMOTION_COLORS
-        )
-        st.plotly_chart(fig, use_container_width=True)
-        
-        st.subheader("Last 5 Moods")
-        for entry in st.session_state.mood_history[-5:][::-1]:
-            st.write(f"{entry['timestamp'].strftime('%H:%M')} - {EMOTION_EMOJIS.get(entry['emotion'], '')} {entry['emotion'].capitalize()}")
-    else:
-        st.info("Start chatting to see your mood journey!")
-        
-    st.divider()
-    with st.expander("🌿 30-Second Grounding Exercise"):
-        st.write("""
-        **5-4-3-2-1 Technique:**
-        - **5** things you can **see**
-        - **4** things you can **feel**
-        - **3** things you can **hear**
-        - **2** things you can **smell**
-        - **1** thing you can **taste**
-        """)
-        if st.button("Start Timer ▶"):
-            timer_placeholder = st.empty()
-            for i in range(30, 0, -1):
-                timer_placeholder.markdown(f"## ⏳ {i}s")
-                time.sleep(1)
-            timer_placeholder.success("Aram naal saah lao. (Take a deep breath.) 🧘")
+CRISIS_HELPLINES = """
+### 🚨 Emergency Resources & Helplines (India)
+If you or someone you know is feeling overwhelmed or in crisis, please reach out for professional help immediately:
+- **AASRA (Crisis Intervention & Suicide Prevention):** +91-9820466726
+- **Vandrevala Foundation (Mental Health Helpline):** +91-9999 666 555
+- **Kiran (Mental Health Helpline by Govt. of India):** 1800-599-0019
+- **GNDEC Student Guidance & Counseling Cell:** Make sure to visit the counseling center on campus.
+"""
 
-# Display message history
-for message in st.session_state.messages:
-    if message["content"] != "⚠️ Crisis Alert: Help Resources Provided.":
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+st.info("Built live at GNDEC Ludhiana - Empowering mental wellbeing of engineering students locally.")
 
-# Chat input
-if prompt := st.chat_input("Dasso kya ho raha hai..."):
-    # Display user message
-    st.chat_message("user").markdown(prompt)
-    st.session_state.messages.append({"role": "user", "content": prompt})
+col1, col2 = st.columns([2, 1])
+
+with col1:
+    st.subheader("💬 Chat with MindMitra")
     
-    # Process feelings
-    emotion, score = get_top_emotion(prompt)
-    is_crisis = check_crisis(prompt)
+    # Text Input
+    user_input = st.text_area("How are you feeling today? Share your thoughts...", height=100)
     
-    # Update mood history
-    st.session_state.mood_history.append({
-        "emotion": emotion,
-        "timestamp": datetime.datetime.now(),
-        "text": prompt[:50]
-    })
-    
-    # Generate response
-    with st.chat_message("assistant"):
-        if is_crisis:
-            # Sinamor: 1. Crisis Handling Upgrade
-            st.markdown("""
-            <div style="background-color: #FFCDD2; padding: 25px; border-radius: 15px; border-left: 10px solid #D32F2F;">
-                <h2 style="color: #B71C1C; margin-top: 0;">🛑 Ruk. Ik minute.</h2>
-                <p style="font-size: 1.2em; font-weight: bold; color: #B71C1C;">Tenu pyaar hai. Tu akela nahin.</p>
-                <p>Please talk to someone right now. Yeh message save kar lo.</p>
-                <hr style="border-top: 1px solid #B71C1C;">
-                <ul style="list-style-type: none; padding: 0;">
-            """, unsafe_allow_html=True)
-            
-            for provider, phone in INDIAN_HELPLINES.items():
-                st.markdown(f"**📞 {provider}:** {phone}")
-            
-            st.markdown("""
-                </ul>
-                <div style="margin-top: 15px; font-weight: bold;">
-                    📍 GNDEC Student Counseling Cell: Visit Admin Block, Room 102.
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            st.session_state.messages.append({"role": "assistant", "content": "⚠️ Crisis Alert: Help Resources Provided."})
+    # Voice Input Button (Mockup logic for Streamlit as direct mic access needs a custom component to work perfectly in browser)
+    if st.button("🎤 Or click here to Speak (Requires local mic access)"):
+        with st.spinner("Listening..."):
+            user_input = speech_to_text()
+            st.success(f"Heard: {user_input}")
+
+    if st.button("Analyze & Respond"):
+        if user_input.strip():
+            with st.spinner("Analyzing your emotions..."):
+                results = analyze_emotion(user_input)
+                
+                # The model returns a list of lists of dictionaries. We sort by highest score.
+                # E.g., [[{'label': 'sadness', 'score': 0.9}, ...]]
+                emotions = results[0]
+                top_emotion = max(emotions, key=lambda x: x['score'])
+                
+                emotion_label = top_emotion['label']
+                emotion_score = top_emotion['score']
+                
+                st.write(f"### Detected Emotion: **{emotion_label.capitalize()}** (Confidence: {emotion_score:.2f})")
+                
+                response_en = RESPONSES.get(emotion_label, RESPONSES["neutral"])["en"]
+                response_pa = RESPONSES.get(emotion_label, RESPONSES["neutral"])["pa"]
+                
+                st.success(f"**English Response:**\n\n{response_en}")
+                st.info(f"**Punjabi Response:**\n\n{response_pa}")
+                
+                # Optional TTS
+                # text_to_speech(response_en) # Consider uncommenting if evaluating locally
+                
+                # Trigger Crisis Protocol if dealing with severe negative emotions with high confidence
+                if emotion_label in ['sadness', 'fear'] and emotion_score > 0.8:
+                    st.error("It seems you are going through a tough time.")
+                    st.markdown(CRISIS_HELPLINES)
+                    
         else:
-            base_response = EMOTION_RESPONSES.get(emotion, EMOTION_RESPONSES["neutral"]).format(name=st.session_state.user_name)
-            response = f"{base_response} {EMOTION_EMOJIS.get(emotion, '')}"
-            
-            # Typing animation
-            message_placeholder = st.empty()
-            full_response = ""
-            for char in response:
-                full_response += char
-                message_placeholder.markdown(full_response + "▌")
-                time.sleep(0.03)
-            message_placeholder.markdown(full_response)
-            st.session_state.messages.append({"role": "assistant", "content": response})
-        
-    # Re-run to update sidebar
-    st.rerun()
+            st.warning("Please type something or use the voice input to share your thoughts.")
 
-# Footer
-st.markdown("""
-<div class="footer">
-    Made live in 8 hours · GNDEC Ludhiana · Sinamor · Mental health matters 💚
-</div>
-""", unsafe_allow_html=True)
+with col2:
+    st.subheader("📊 Emotion Analytics")
+    st.write("Track your emotional journey (Demo)")
+    
+    # Placeholder for Chart
+    if user_input and 'results' in locals() and results:
+        df = pd.DataFrame(results[0])
+        fig = px.bar(df, x='label', y='score', title="Current Emotion Distribution", color='label')
+        st.plotly_chart(fig, use_container_width=True)
+    else:
+        st.write("Share your thoughts to see your emotion analytics graphic here!")
+    
+    st.write("---")
+    st.markdown(CRISIS_HELPLINES)
+    
+    if st.button("Download Session PDF Report"):
+        # Dummy summary for the PDF
+        pdf_bytes = generate_pdf_report("User discussed feeling their current state. Emotion detected.")
+        st.download_button(
+            label="📄 Download Report",
+            data=pdf_bytes,
+            file_name="MindMitra_Session_Report.pdf",
+            mime="application/pdf"
+        )
