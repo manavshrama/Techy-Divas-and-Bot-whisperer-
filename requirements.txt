@@ -1,0 +1,9 @@
+# Sinamor
+streamlit
+transformers
+torch
+plotly
+pandas
+SpeechRecognition
+pyttsx3
+fpdf2
