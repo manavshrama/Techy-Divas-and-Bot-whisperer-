@@ -1,35 +1,40 @@
-# Sinamor — voice module
-# Graceful fallback: if no mic or PyAudio, app doesn't crash
+# Sinamor — Graceful Voice Fallback implementation
+# Handles cases where PyAudio is missing, missing mics, or timeouts seamlessly.
 
 import speech_recognition as sr
 import pyttsx3
 
-
 def speech_to_text() -> str:
     """
-    Listens via microphone and returns transcribed text.
-    Returns an Error string (not exception) if hardware is missing.
+    Listens to microphone & uses Google Web Speech API.
+    Returns graceful error string instead of crashing Streamlit if hardware fails.
     """
     try:
-        recognizer = sr.Recognizer()
+        r = sr.Recognizer()
         with sr.Microphone() as source:
-            recognizer.adjust_for_ambient_noise(source, duration=0.5)
-            audio = recognizer.listen(source, timeout=5, phrase_time_limit=10)
-        return recognizer.recognize_google(audio)
+            r.adjust_for_ambient_noise(source, duration=0.7)
+            # Short timeout so the app doesn't hang forever
+            audio = r.listen(source, timeout=6)
+        
+        text = r.recognize_google(audio)
+        return text
+    
     except sr.WaitTimeoutError:
-        return "Error: Timed out — no speech detected."
+        return "Error: Timeout — it was too quiet. Try again."
     except sr.UnknownValueError:
-        return "Error: Couldn't understand the audio. Try again."
+        return "Error: Could not understand audio. Try speaking clearer."
     except Exception as e:
-        # Sinamor: this catches missing PyAudio, no mic hardware, etc.
-        return f"Error: Mic/PyAudio issue — {str(e)[:60]}"
-
+        # Most likely PyAudio not installed or no mic plugged in
+        return f"Error: Hardware or dependency issue. Did you pip install PyAudio? ({str(e)[:50]})"
 
 def text_to_speech(text: str):
-    """Local TTS for developer testing. Non-blocking on failure."""
+    """
+    Local testing function for text-to-speech.
+    We don't block failures here so it doesn't crash cloud deployments (cloud servers have no speakers).
+    """
     try:
         engine = pyttsx3.init()
         engine.say(text)
         engine.runAndWait()
     except Exception:
-        pass  # silently skip on cloud where no audio device exists
+        pass  # Completely silent failure for Streamlit Cloud

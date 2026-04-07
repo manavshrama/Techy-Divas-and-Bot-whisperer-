@@ -1,150 +1,73 @@
-# MindMitra GNDEC Edition 🧘
+# MindMitra: GNDEC Edition 🧘
 
-![Streamlit](https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white)
-![HuggingFace](https://img.shields.io/badge/HuggingFace-F9AB00?style=for-the-badge&logo=huggingface&logoColor=white)
-![Python](https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white)
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://mindmitra-gndec.streamlit.app/)
+![Python](https://img.shields.io/badge/Python-3.9+-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Transformers](https://img.shields.io/badge/HuggingFace-Transformers-yellow?style=for-the-badge&logo=huggingface)
 
-> **An anonymous, AI-powered mental wellness companion built for engineering students in Punjab.**
-
-MindMitra detects emotions in real-time using transformer models, provides bilingual (English + Punjabi) empathetic responses, and features a robust crisis detection system that immediately routes students to verified Indian helplines.
+**MindMitra** is a premium, AI-powered mental wellness companion specifically designed for engineering students at **GNDEC Ludhiana**. It provides an anonymous, safe space to vent frustrations, track moods, and receive empathetic support in both English and Punjabi.
 
 ---
 
-## ✨ Features
+## 🚀 Key Features
 
-| Feature | Description |
-|---------|-------------|
-| 🧠 **Emotion Detection** | 7-class sentiment analysis via `j-hartmann/emotion-english-distilroberta-base` |
-| 🛑 **Crisis Safety Override** | Keyword-based guard that overrides AI and shows emergency helplines instantly |
-| 🗣️ **Bilingual Responses** | Warm, localized replies in English and Punjabi |
-| 📊 **Live Emotion Radar** | Real-time Plotly visualization of detected sentiments |
-| 📈 **Mood Trend Tracker** | Session-based pie chart in sidebar tracking emotional patterns |
-| ✍️ **Typing Animation** | Word-by-word streaming for natural conversation feel |
-| 📄 **PDF Export** | Download session transcript as a formatted, sanitized PDF |
-| 🎙️ **Voice Input** | Mic support via SpeechRecognition (graceful fallback if unavailable) |
-| 🌿 **Grounding Exercise** | Built-in 5-4-3-2-1 technique with 30-second breathing timer |
-| 🎨 **Premium India-themed UI** | Tricolor accents, glassmorphism header, custom chat bubbles |
+- **🧠 Real-time Emotion Analysis**: Powered by DistilRoBERTa to detect 7 distinct emotional states.
+- **🛡️ Crisis Triage System**: Immediate, non-negotiable safety UI if self-harm intent is detected, linking to 24/7 Indian helplines.
+- **🗣️ Bilingual Empathy**: Natural, warm responses tailored in English and Punjabi (Ma Boli).
+- **📉 Live Mood Radar**: Visual breakdown of your current psychological state using Plotly.
+- **🎤 Voice Connect**: Hands-free interaction using Google's Speech Recognition API.
+- **🌿 Grounding Tools**: Built-in 5-4-3-2-1 sensory exercises with interactive timers to combat anxiety.
+- **📄 Session Vault**: Export your chat session into a secure, sanitized PDF report.
 
 ---
 
-## 📁 Project Structure
+## 🛠️ Tech Stack
 
-```
-mindmitra/
-├── app.py                  # Main Streamlit application
-├── requirements.txt        # Python dependencies (pinned)
-├── README.md               # You're reading this
-├── Dockerfile              # Container deployment
-├── .dockerignore
-├── .streamlit/
-│   └── config.toml         # Theme & server config
-└── utils/
-    ├── emotion.py           # Emotion model + crisis detection + responses
-    ├── pdf_report.py        # PDF generation with fpdf2
-    └── voice.py             # Speech-to-text with graceful fallback
-```
+- **Frontend**: Streamlit
+- **ML Engine**: HuggingFace Transformers (j-hartmann/emotion-english-distilroberta-base)
+- **Visuals**: Plotly Express
+- **Audio**: SpeechRecognition, PyAudio, Pyttsx3
+- **Export**: FPDF2
 
 ---
 
-## 🚀 Quick Start
+## 💻 Local Setup
 
-### Prerequisites
-- Python 3.10+
-- pip
+1. **Clone the Repo**
+   ```bash
+   git clone https://github.com/manavshrama/mindmitra.git
+   cd mindmitra
+   ```
 
-### Installation
+2. **Install Dependencies**
+   ```bash
+   pip install -r requirements.txt
+   ```
+   *Note: For voice support on Windows, you may need: `pip install pipwin && pipwin install pyaudio`*
 
+3. **Launch App**
+   ```bash
+   streamlit run app.py
+   ```
+
+---
+
+## ☁️ Deployment
+
+### Option A: Streamlit Cloud (Recommended)
+1. Push your code to GitHub.
+2. Sign in to [Streamlit Share](https://share.streamlit.io/).
+3. Connect your repository and deploy `app.py`.
+
+### Option B: Docker
 ```bash
-git clone https://github.com/manavshrama/mindmitra.git
-cd mindmitra
-python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-pip install -r requirements.txt
+docker build -t mindmitra .
+docker run -p 8501:8501 mindmitra
 ```
 
-### Run Locally
-
-```bash
-streamlit run app.py
-```
-
-App opens at `http://localhost:8501` 🎉
-
 ---
 
-## ☁️ Deploy to Streamlit Cloud
-
-1. Push this repo to GitHub
-2. Go to [share.streamlit.io](https://share.streamlit.io/)
-3. Click **New App** → Connect your GitHub repo
-4. Set main file path to `app.py`
-5. Click **Deploy**
-
-Streamlit Cloud automatically reads `requirements.txt` and `.streamlit/config.toml`.
-
-> **Note:** Voice input (PyAudio) won't work on Streamlit Cloud — the app gracefully handles this with a user-friendly error message.
+## 🏆 Hackathon Note
+Built with ❤️ by **Sinamor** in just 8 hours for the GNDEC Ludhiana Hackathon (2026-04-07). Dedicated to the mental wellness of every student walking the halls of Gill Park.
 
 ---
-
-## 🐳 Docker Deployment
-
-```bash
-# Build
-docker build -t mindmitra:latest .
-
-# Run
-docker run -d -p 8501:8501 --name mindmitra mindmitra:latest
-```
-
-Access at `http://localhost:8501`
-
----
-
-## 🧪 Test Cases
-
-| # | Input | Expected Behavior |
-|---|-------|-------------------|
-| 1 | "Exams are killing me" | Detects `fear`/`sadness`, shows empathetic response |
-| 2 | "I got selected for internship!" | Detects `joy`, energetic response |
-| 3 | "I feel like ending it" | **Crisis triggered** — helplines shown, AI response blocked |
-| 4 | "Family pressure bahut hai" | Detects `sadness`/`fear`, supportive response |
-| 5 | "Feeling okay today" | Detects `neutral`, casual check-in response |
-| 6 | Voice button (no mic) | Shows graceful error, app doesn't crash |
-| 7 | PDF download | Downloads formatted PDF without unicode crash |
-| 8 | Grounding timer | 30-second countdown runs smoothly |
-
----
-
-## 🔐 Safety & Privacy
-
-- **No data leaves the browser** — everything runs in-session
-- **No conversation logging** — session clears on browser close
-- **Crisis detection runs first** — before any ML model
-- **Verified Indian helplines only** — AASRA, iCall, Vandrevala, Kiran
-
----
-
-## 🏆 Hackathon Context
-
-Built in **8 hours** at **GNDEC Ludhiana** Hackathon (April 2026).
-
-This is a **prototype** — not a replacement for professional mental health support.
-If you or someone you know is struggling, please reach out to the helplines listed in the app.
-
----
-
-## 👨‍💻 Author
-
-**Sinamor** — B.Tech CSE, GNDEC Ludhiana
-
----
-
-<p align="center">
-  <i>Built with ❤️ for students who need someone to talk to.</i>
-</p>
+*Disclaimer: This is an AI companion, not a replacement for professional medical advice.*

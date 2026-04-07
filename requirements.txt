@@ -1,8 +1,17 @@
-streamlit==1.32.2
-transformers==4.38.2
-torch==2.2.1
-plotly==5.19.0
-pandas==2.2.1
-SpeechRecognition==3.10.1
-pyttsx3==2.90
-fpdf2==2.7.9
+# UI Framework
+streamlit>=1.32.2
+
+# ML & NLP
+transformers>=4.38.2
+torch>=2.2.1
+
+# Data & Visualizations
+plotly>=5.19.0
+pandas>=2.2.1
+
+# Speech Processing
+SpeechRecognition>=3.10.1
+pyttsx3>=2.90
+
+# PDF Generation
+fpdf2>=2.7.9
