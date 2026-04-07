@@ -163,3 +163,65 @@ def analyze_and_respond(user_input: str, emotion_model: Any) -> Tuple[str, str, 
     response_text = responses.get(predicted_label, responses["neutral"])
     
     return (predicted_label, response_text, False)
+
+# ==========================================
+# MAIN EXECUTION: THE VIBE BEGINS HERE
+# ==========================================
+
+def main():
+    # 1. Initialize Aesthetics
+    setup_page()
+    
+    # 2. Sidebar for GNDEC Pride & Info
+    with st.sidebar:
+        st.title("🧡 MindMitra Info")
+        st.info("Built specifically for the students of Guru Nanak Dev Engineering College.")
+        st.markdown("---")
+        st.write("**Model:** DistilRoBERTa Emotion")
+        st.write("**Language:** Bilingual Support")
+        if st.button("Clear Chat History"):
+            st.session_state.messages = []
+            st.rerun()
+
+    # 3. Load Model (Cached)
+    emotion_model = load_emotion_model()
+    
+    # 4. Initialize Local Chat State
+    if "messages" not in st.session_state:
+        st.session_state.messages = []
+
+    # 5. Display Historic Conversations
+    for message in st.session_state.messages:
+        with st.chat_message(message["role"]):
+            st.markdown(message["content"])
+
+    # 6. Chat Input Logic
+    if prompt := st.chat_input("Shubh swera! Kaun si gal karni hai?... (I'm listening...)"):
+        # Display user message
+        st.session_state.messages.append({"role": "user", "content": prompt})
+        with st.chat_message("user"):
+            st.markdown(prompt)
+
+        # Process and Predict
+        with st.spinner("MindMitra is listening carefully..."):
+            predicted_label, response_text, is_crisis = analyze_and_respond(prompt, emotion_model)
+
+        # Display Response
+        with st.chat_message("assistant"):
+            st.markdown(response_text)
+            # Subtle tricolor indicator for the 'vibe'
+            if not is_crisis:
+                color_map = {
+                    "joy": "orange",
+                    "sadness": "blue",
+                    "anger": "red",
+                    "fear": "purple",
+                    "neutral": "grey"
+                }
+                vibe_color = color_map.get(predicted_label, "grey")
+                st.caption(f":{vibe_color}[Current Emotional Vibe: {predicted_label.title()}]")
+            
+        st.session_state.messages.append({"role": "assistant", "content": response_text})
+
+if __name__ == "__main__":
+    main()
